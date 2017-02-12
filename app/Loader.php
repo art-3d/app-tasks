@@ -19,7 +19,7 @@ class Loader
 
     public function load($className)
     {
-        $classPath = '../' . lcfirst(str_replace('\\', '/', $className)) . '.php';
+        $classPath = __DIR__ . '/../' . lcfirst(str_replace('\\', '/', $className)) . '.php';
         include_once($classPath);
     }
 
