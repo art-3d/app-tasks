@@ -1,28 +1,40 @@
 <?php
 
-use Lib\DI\Service;
+namespace App\Renderer;
+
+use App\DI\Service;
 
 class Renderer
 {
-    public function render($view, $params = array())
+    public static function render($view, $params = array())
     {
         $config = Service::get('app')->config;
 
-        $controller = strtolower($config['controller']);
+        $controller = self::getControllerName($config['controller']);
         $dir = preg_replace('/\w+$/', '', __DIR__);
         $viewPath = $dir . '../src/views/' . $controller . '/' . $view;
-        $layoutPath = $dir . 'views/layout/' . $config['layout'];
+        $layoutPath = $dir . '../src/views/layout/' . $config['layout'];
 
-        $content = $this->extract($viewPath, $params);
+        $content = self::extract($viewPath, $params);
 
-        return $this->extract($layoutPath, [
+        return self::extract($layoutPath, [
             'content' => $content,
             'title' => $params['title']
         ]);
     }
 
-    protected function extract($viewPath, $params)
+    private static function getControllerName($path)
     {
+        $matches = [];
+        preg_match('/(\w+)Controller$/', $path, $matches);
+        return strtolower($matches[1]);
+    }
+
+    private static function extract($viewPath, $params)
+    {
+        if (! file_exists($viewPath)) {
+            echo $viewPath;die;
+        }
         ob_start();
         extract($params);
         include($viewPath);
